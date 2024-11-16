@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
+    console.log("Game initialized");
     candyCrushGame();
 });
 
@@ -29,6 +30,7 @@ function candyCrushGame() {
             grid.appendChild(square);
             squares.push(square);
         }
+        console.log("Grid created with squares:", squares);
     }
     createBoard();
 
@@ -47,14 +49,14 @@ function candyCrushGame() {
         square.addEventListener("dragenter", dragEnter)
     );
     squares.forEach((square) =>
-        square.addEventListener("drageleave", dragLeave)
+        square.addEventListener("dragleave", dragLeave)
     );
     squares.forEach((square) => square.addEventListener("drop", dragDrop));
 
     function dragStart() {
+        console.log("Drag Start:", this.id);
         colorBeingDragged = this.style.backgroundImage;
         squareIdBeingDragged = parseInt(this.id);
-        // this.style.backgroundImage = ''
     }
 
     function dragOver(e) {
@@ -66,46 +68,43 @@ function candyCrushGame() {
     }
 
     function dragLeave() {
-        this.style.backgroundImage = "";
+        console.log("Drag Leave");
     }
 
     function dragDrop() {
+        console.log("Dropped on:", this.id);
         colorBeingReplaced = this.style.backgroundImage;
         squareIdBeingReplaced = parseInt(this.id);
         this.style.backgroundImage = colorBeingDragged;
-        squares[
-            squareIdBeingDragged
-        ].style.backgroundImage = colorBeingReplaced;
+        squares[squareIdBeingDragged].style.backgroundImage = colorBeingReplaced;
     }
 
     function dragEnd() {
-        //Defining, What is a valid move?
+        console.log("Drag End");
+        // Define valid moves
         let validMoves = [
             squareIdBeingDragged - 1,
             squareIdBeingDragged - width,
             squareIdBeingDragged + 1,
-            squareIdBeingDragged + width
+            squareIdBeingDragged + width,
         ];
         let validMove = validMoves.includes(squareIdBeingReplaced);
 
         if (squareIdBeingReplaced && validMove) {
             squareIdBeingReplaced = null;
         } else if (squareIdBeingReplaced && !validMove) {
-            squares[
-                squareIdBeingReplaced
-            ].style.backgroundImage = colorBeingReplaced;
-            squares[
-                squareIdBeingDragged
-            ].style.backgroundImage = colorBeingDragged;
-        } else
-            squares[
-                squareIdBeingDragged
-            ].style.backgroundImage = colorBeingDragged;
+            console.log("Invalid move, resetting...");
+            squares[squareIdBeingReplaced].style.backgroundImage = colorBeingReplaced;
+            squares[squareIdBeingDragged].style.backgroundImage = colorBeingDragged;
+        } else {
+            console.log("Resetting drag...");
+            squares[squareIdBeingDragged].style.backgroundImage = colorBeingDragged;
+        }
     }
 
-    //Dropping candies once some have been cleared
+    // Dropping candies once some have been cleared
     function moveIntoSquareBelow() {
-        for (i = 0; i < 55; i++) {
+        for (let i = 0; i < 55; i++) {
             if (squares[i + width].style.backgroundImage === "") {
                 squares[i + width].style.backgroundImage =
                     squares[i].style.backgroundImage;
@@ -113,54 +112,30 @@ function candyCrushGame() {
                 const firstRow = [0, 1, 2, 3, 4, 5, 6, 7];
                 const isFirstRow = firstRow.includes(i);
                 if (isFirstRow && squares[i].style.backgroundImage === "") {
-                    let randomColor = Math.floor(
-                        Math.random() * candyColors.length
-                    );
+                    let randomColor = Math.floor(Math.random() * candyColors.length);
                     squares[i].style.backgroundImage = candyColors[randomColor];
                 }
             }
         }
     }
 
-    ///-> Checking for Matches <-///
-
-    //For Row of Four
+    // Check for Matches
     function checkRowForFour() {
-        for (i = 0; i < 60; i++) {
+        for (let i = 0; i < 60; i++) {
             let rowOfFour = [i, i + 1, i + 2, i + 3];
             let decidedColor = squares[i].style.backgroundImage;
             const isBlank = squares[i].style.backgroundImage === "";
 
             const notValid = [
-                5,
-                6,
-                7,
-                13,
-                14,
-                15,
-                21,
-                22,
-                23,
-                29,
-                30,
-                31,
-                37,
-                38,
-                39,
-                45,
-                46,
-                47,
-                53,
-                54,
-                55
+                5, 6, 7, 13, 14, 15, 21, 22, 23, 29, 30, 31, 37, 38, 39, 45, 46, 47,
+                53, 54, 55,
             ];
             if (notValid.includes(i)) continue;
 
             if (
                 rowOfFour.every(
                     (index) =>
-                        squares[index].style.backgroundImage === decidedColor &&
-                        !isBlank
+                        squares[index].style.backgroundImage === decidedColor && !isBlank
                 )
             ) {
                 score += 4;
@@ -171,11 +146,9 @@ function candyCrushGame() {
             }
         }
     }
-    checkRowForFour();
 
-    //For Column of Four
     function checkColumnForFour() {
-        for (i = 0; i < 39; i++) {
+        for (let i = 0; i < 39; i++) {
             let columnOfFour = [i, i + width, i + width * 2, i + width * 3];
             let decidedColor = squares[i].style.backgroundImage;
             const isBlank = squares[i].style.backgroundImage === "";
@@ -183,8 +156,7 @@ function candyCrushGame() {
             if (
                 columnOfFour.every(
                     (index) =>
-                        squares[index].style.backgroundImage === decidedColor &&
-                        !isBlank
+                        squares[index].style.backgroundImage === decidedColor && !isBlank
                 )
             ) {
                 score += 4;
@@ -195,38 +167,22 @@ function candyCrushGame() {
             }
         }
     }
-    checkColumnForFour();
 
-    //For Row of Three
     function checkRowForThree() {
-        for (i = 0; i < 61; i++) {
+        for (let i = 0; i < 61; i++) {
             let rowOfThree = [i, i + 1, i + 2];
             let decidedColor = squares[i].style.backgroundImage;
             const isBlank = squares[i].style.backgroundImage === "";
 
             const notValid = [
-                6,
-                7,
-                14,
-                15,
-                22,
-                23,
-                30,
-                31,
-                38,
-                39,
-                46,
-                47,
-                54,
-                55
+                6, 7, 14, 15, 22, 23, 30, 31, 38, 39, 46, 47, 54, 55,
             ];
             if (notValid.includes(i)) continue;
 
             if (
                 rowOfThree.every(
                     (index) =>
-                        squares[index].style.backgroundImage === decidedColor &&
-                        !isBlank
+                        squares[index].style.backgroundImage === decidedColor && !isBlank
                 )
             ) {
                 score += 3;
@@ -237,11 +193,9 @@ function candyCrushGame() {
             }
         }
     }
-    checkRowForThree();
 
-    //For Column of Three
     function checkColumnForThree() {
-        for (i = 0; i < 47; i++) {
+        for (let i = 0; i < 47; i++) {
             let columnOfThree = [i, i + width, i + width * 2];
             let decidedColor = squares[i].style.backgroundImage;
             const isBlank = squares[i].style.backgroundImage === "";
@@ -249,8 +203,7 @@ function candyCrushGame() {
             if (
                 columnOfThree.every(
                     (index) =>
-                        squares[index].style.backgroundImage === decidedColor &&
-                        !isBlank
+                        squares[index].style.backgroundImage === decidedColor && !isBlank
                 )
             ) {
                 score += 3;
@@ -261,10 +214,8 @@ function candyCrushGame() {
             }
         }
     }
-    checkColumnForThree();
 
-
-    window.setInterval(function () {
+    window.setInterval(() => {
         checkRowForFour();
         checkColumnForFour();
         checkRowForThree();
